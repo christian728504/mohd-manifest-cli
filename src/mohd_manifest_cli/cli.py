@@ -28,7 +28,7 @@ def main():
 
     path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
     print(path)
-    molecular_df = pl.read_csv(path, separator="\t")
+    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'mohd_accession': pl.Utf8, 'opc_id': pl.Utf8}))
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
