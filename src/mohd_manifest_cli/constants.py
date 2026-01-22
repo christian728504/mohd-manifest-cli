@@ -1,5 +1,6 @@
-GOOGLE_SHEET_NAME = "MOHD DATA PROCESSING"
-CREDENTIALS_FILE = "credentials.json"
+# GOOGLE_SHEET_NAME = "MOHD DATA PROCESSING"
+# CREDENTIALS_FILE = "credentials.json"
+MAPPING_FILE_GLOB_EXP_FORMAT_STRING = "/data/projects/mohd/data/Molecular/8_Raw_Globus/Mapping-Files/*.{mol}.mapping"
 FORMAT_STRING_MAP = {
     'RNA': "MOHD_ER1{:05d}",
     'ATAC': "MOHD_EA1{:05d}",

@@ -1,15 +1,14 @@
 import io
 import os
 import pydoc
-import gspread
+import socket
 import polars as pl
 from argparse import ArgumentParser
 from mohd_manifest_cli.constants import *
-from oauth2client.service_account import ServiceAccountCredentials
 
 def parser_args():
     parser = ArgumentParser(description="Create a manifest for a given molecular data type. Pulls from the refrerence Google Sheet.")
-    parser.add_argument('--molecular-data-type', type=str, choices=['RNA', 'ATAC', 'WGS', 'WGBS'], required=True)
+    parser.add_argument('molecular_data_type', type=str, choices=['RNA', 'ATAC', 'WGS', 'WGBS'])
     parser.add_argument('--range', type=int, nargs=2, metavar=('START', 'END'), default=(1, -1), help="Range defining which MOHD Accessions to process. Half-closed interval.")
     parser.add_argument('--dryrun', action="store_true", help="Do not write the metadata.tsv file")
     args = parser.parse_args()
@@ -22,23 +21,14 @@ def main():
         expression = True
     assert expression, f"Invalid Range: {args.range}"
 
-    if os.path.exists(CREDENTIALS_FILE):
-        credentials_file_path = os.path.join(os.getcwd(), CREDENTIALS_FILE)
-    elif os.path.exists(os.path.join(os.environ['HOME'], CREDENTIALS_FILE)):
-        credentials_file_path = os.path.join(os.environ['HOME'], CREDENTIALS_FILE)
-    else:
-        raise FileNotFoundError(f"Could not find credentials file at {CREDENTIALS_FILE}. It should be in the current directory or in your home directory.")
+    valid_aliases = ['z010', 'z011', 'z012', 'z013', 'z014', 'z020', 'z021', 'z022']
+    hostname_fmt_str = "{alias}.internal.wenglab.org"
+    valid_hostnames = [hostname_fmt_str.format(alias=alias) for alias in valid_aliases]
+    assert socket.gethostname() in valid_hostnames, f"This CLI must be executed on one of the ZLab servers. Valid hostnames are {valid_hostnames}"
 
-    scope = [
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive'
-    ]
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(credentials_file_path, scope) # type: ignore
-    client = gspread.authorize(credentials)
-    sheet = client.open(GOOGLE_SHEET_NAME).worksheet(args.molecular_data_type)
-    
-    sheet_records = sheet.get_all_records()
-    molecular_df = pl.from_records(sheet_records)
+    path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
+    print(path)
+    molecular_df = pl.read_csv(path, separator="\t")
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
@@ -84,4 +74,4 @@ def main():
     fastq_df.write_csv("metadata.tsv", separator='\t')
 
 if __name__ == "__main__":
-    pass
+    main()
