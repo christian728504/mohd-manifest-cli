@@ -28,7 +28,7 @@ def main():
 
     path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
     print(path)
-    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8}))
+    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8}), has_header=False)
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
@@ -40,7 +40,9 @@ def main():
     if args.range[1] == -1: # -1 means "to the end"
         max_numerical_part = int(molecular_df['numerical_part'].max()) # type: ignore
         num_range = range(args.range[0], max_numerical_part + 1)
-
+    
+    breakpoint()
+    
     molecular_df = molecular_df.filter(pl.col('numerical_part').is_in(num_range))
     numerical_parts = molecular_df['numerical_part'].to_list()
     opc_ids = molecular_df['opc_id'].to_list()
