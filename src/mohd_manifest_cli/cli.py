@@ -41,8 +41,6 @@ def main():
         max_numerical_part = int(molecular_df['numerical_part'].max()) # type: ignore
         num_range = range(args.range[0], max_numerical_part + 1)
     
-    breakpoint()
-    
     molecular_df = molecular_df.filter(pl.col('numerical_part').is_in(num_range))
     numerical_parts = molecular_df['numerical_part'].to_list()
     opc_ids = molecular_df['opc_id'].to_list()
