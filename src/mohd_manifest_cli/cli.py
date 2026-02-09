@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from mohd_manifest_cli.constants import *
 
 def parser_args():
-    parser = ArgumentParser(description="Create a manifest for a given molecular data type. Pulls from the refrerence Google Sheet.")
+    parser = ArgumentParser(description="Create a manifest for a given molecular data type.")
     parser.add_argument('molecular_data_type', type=str, choices=['RNA', 'ATAC', 'WGS', 'WGBS'])
     parser.add_argument('--range', type=int, nargs=2, metavar=('START', 'END'), default=(1, -1), help="Range defining which MOHD Accessions to process. Half-closed interval.")
     parser.add_argument('--dryrun', action="store_true", help="Do not write the metadata.tsv file")
@@ -27,8 +27,7 @@ def main():
     assert socket.gethostname() in valid_hostnames, f"This CLI must be executed on one of the ZLab servers. Valid hostnames are {valid_hostnames}"
 
     path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
-    print(path)
-    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8}), has_header=False)
+    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8, 'notes', pl.Utf8}), has_header=False)
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
