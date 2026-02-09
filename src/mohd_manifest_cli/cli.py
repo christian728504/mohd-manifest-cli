@@ -27,7 +27,7 @@ def main():
     assert socket.gethostname() in valid_hostnames, f"This CLI must be executed on one of the ZLab servers. Valid hostnames are {valid_hostnames}"
 
     path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
-    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8, 'notes', pl.Utf8}), has_header=False)
+    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8, 'notes': pl.Utf8}), has_header=False)
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
