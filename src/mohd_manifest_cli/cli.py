@@ -1,8 +1,10 @@
 import io
 import os
+import glob
 import pydoc
 import socket
 import polars as pl
+import subprocess
 from argparse import ArgumentParser
 from mohd_manifest_cli.constants import *
 
@@ -27,7 +29,10 @@ def main():
     assert socket.gethostname() in valid_hostnames, f"This CLI must be executed on one of the ZLab servers. Valid hostnames are {valid_hostnames}"
 
     path = MAPPING_FILE_GLOB_EXP_FORMAT_STRING.format(mol=args.molecular_data_type)
-    molecular_df = pl.read_csv(path, separator="\t", schema=pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8, 'notes': pl.Utf8}), has_header=False)
+    files = list(glob.glob(path))
+    result = subprocess.check_output(["/bin/cut", "-d", '\t', "-f1,2"] + files)
+    schema= pl.Schema({'opc_id': pl.Utf8, 'mohd_accession': pl.Utf8})
+    molecular_df= pl.read_csv(result, separator='\t', has_header=False, schema=schema, infer_schema_length=None).sort('mohd_accession')
 
     buffer = io.StringIO()
     molecular_df.write_csv(buffer, separator='\t')
